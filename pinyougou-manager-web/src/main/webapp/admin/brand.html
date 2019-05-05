@@ -11,10 +11,60 @@
     <link rel="stylesheet" href="../css/style.css">
 	<script src="../plugins/jQuery/jquery-2.2.3.min.js"></script>
     <script src="../plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="../plugins/angularjs/angular.min.js"></script>		
+    <!-- 引入分页的组件 -->
+    <script src="../plugins/angularjs/pagination.js"></script>
+    <link rel="stylesheet" href="../plugins/angularjs/pagination.css">
+   	<script >
+        //设置查询所有的模块
+   		var app=angular.module('myApp',['pagination']);
+   		//设置控制器
+   		app.controller('myController',function($scope,$http){
+   			
+   			$scope.findAll=function(){
+   				$http.get('../brand/findAll.do').success(
+   	   					function(response){
+   	   	   					$scope.list=response;
+   	   	   				}		
+   	   			);
+   			}
+   			
+   			$scope.reloadList=function(){
+   				$scope.findByPage($scope.paginationConf.currentPage,$scope.paginationConf.itemsPerPage);
+   				dubugger;
+   			}
 
-    
+   		   //分页控件配置
+            $scope.paginationConf = {
+                currentPage: 1,
+                totalItems: 10,
+                itemsPerPage: 10,
+                perPageOptions: [10, 20, 30, 40, 50],
+                onChange: function () {
+                    $scope.reloadList();//重新加载
+                }
+            };
+   			
+   			$scope.findByPage=function(page,size){
+   	   			//设置分页查询
+   	   	   			$http.get("../brand/findByPage.do?page="+page+"&size="+size).success(
+   	   	   				function(response){
+   	   	   					$scope.list=response.rowsList;
+   	   	   					//更新共记录数
+   	   	   					$scope.paginationConf.totalItems=response.total;
+   	   	   				}
+   	   	   			);
+   	   	   	}
+   				
+   			
+   			
+   		});
+   		
+   		
+   		
+   	</script>
 </head>
-<body class="hold-transition skin-red sidebar-mini">
+<body class="hold-transition skin-red sidebar-mini" ng-app="myApp" ng-controller="myController">
   <!-- .box-body -->
                     <div class="box-header with-border">
                         <h3 class="box-title">品牌管理</h3>
@@ -56,37 +106,21 @@
 			                          </tr>
 			                      </thead>
 			                      <tbody>
-			                          <tr>
+			                          <tr ng-repeat="entity in list">
 			                              <td><input  type="checkbox" ></td>			                              
-				                          <td>1</td>
-									      <td>联想</td>									     
-		                                  <td>L</td>		                                 
+				                          <td>{{entity.id}}</td>
+									      <td>{{entity.name}}</td>									     
+		                                  <td>{{entity.firstChar}}</td>		                                 
 		                                  <td class="text-center">                                           
 		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal"  >修改</button>                                           
 		                                  </td>
 			                          </tr>
-									  <tr>
-			                              <td><input  type="checkbox"></td>			                              
-				                          <td>2</td>
-									      <td>华为</td>									     
-		                                  <td>H</td>		                                 
-		                                  <td class="text-center">                                           
-		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal"  >修改</button>                                           
-		                                  </td>
-			                          </tr>
-									  <tr>
-			                              <td><input  type="checkbox"></td>			                              
-				                          <td>3</td>
-									      <td>三星</td>									     
-		                                  <td>S</td>		                                 
-		                                  <td class="text-center">                                           
-		                                 	  <button type="button" class="btn bg-olive btn-xs" data-toggle="modal" data-target="#editModal"  >修改</button>                                           
-		                                  </td>
-			                          </tr>
+									 
+									  
 			                      </tbody>
 			                  </table>
 			                  <!--数据列表/-->                        
-							  
+							    <tm-pagination conf="paginationConf"></tm-pagination>
 							 
                         </div>
                         <!-- 数据表格 /-->
